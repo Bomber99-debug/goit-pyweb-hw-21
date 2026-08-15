@@ -11,6 +11,18 @@ class Settings(BaseSettings):
 	SECRET_KEY_JWT: str = ""
 	ALGORITHM: str = "HS256"
 
+	@field_validator('ALGORITHM')
+	@classmethod
+	def validate_algorithm(cls, v:str):
+		if v not in ["HS256", "HS384", "HS512"]:
+			raise ValueError("Algorithm must be HS256 or HS384 or HS512")
+		return v
+	model_config = ConfigDict(
+		extra='ignore',
+		env_file='.env', #noqa
+		env_file_encoding='utf-8', #noqa
+		)
+
 
 
 config = Settings()
