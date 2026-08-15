@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, HTTPException, status  # noqa: EXE002
+from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 

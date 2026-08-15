@@ -1,9 +1,8 @@
 from pydantic import (
-	ConfigDict,
 	field_validator,
 	EmailStr,
 	)
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -17,7 +16,7 @@ class Settings(BaseSettings):
 		if v not in ["HS256", "HS384", "HS512"]:
 			raise ValueError("Algorithm must be HS256 or HS384 or HS512")
 		return v
-	model_config = ConfigDict(
+	model_config = SettingsConfigDict(
 		extra='ignore',
 		env_file='.env', #noqa
 		env_file_encoding='utf-8', #noqa
