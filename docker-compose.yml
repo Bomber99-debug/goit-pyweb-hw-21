@@ -1,15 +1,39 @@
 services:
-  redis:
+  cash:
     image: redis:alpine
     ports:
       - "6379:6379"
-  postgres:
+    volumes:
+      - redis_data:/data
+  db:
     image: postgres
-    environment:
-      POSTGRES_DB: ${PG_DB}
-      POSTGRES_USER: ${PG_USER}
-      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    env_file:
+      - .env
     ports:
       - "5432:5432"
     volumes:
       - ./postgres-data:/var/lib/postgresql/18/docker
+  email:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+  fastapi:
+    build: .
+    volumes:
+      - .:/app
+    command:
+      - uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - 8000:8000
+    environment:
+      - POSTGRES_HOST=db
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+
+volumes:
+  redis_data:
+  postgres-data:
