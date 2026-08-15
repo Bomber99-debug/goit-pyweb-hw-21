@@ -5,6 +5,7 @@ services:
       - "6379:6379"
     volumes:
       - ./cash:/data
+
   db:
     image: postgres
     env_file:
@@ -13,17 +14,19 @@ services:
       - "5432:5432"
     volumes:
       - ./DB:/var/lib/postgresql/18/docker
+
   email:
     image: mailhog/mailhog
     ports:
       - "1025:1025"
       - "8025:8025"
+
   fastapi:
-    build: .
+    build:
+      context: .
+      network: host
     volumes:
       - .:/app
-    command:
-      - uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - 8000:8000
     environment:
