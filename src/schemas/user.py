@@ -23,9 +23,3 @@ class UserCreateSchema( BaseModel ):
 	email: EmailStr
 	password: str = Field( min_length=6, max_length=20 )
 	avatar: str | None = Field( default=None )
-
-
-class TokenShema( BaseModel ):
-	access_token: str
-	refresh_token: str
-	token_type: str = "bearer"

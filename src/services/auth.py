@@ -26,28 +26,24 @@ class Auth:
 	oauth2_scheme = OAuth2PasswordBearer( tokenUrl="auth/login" )
 
 	# define a function to generate a new access token
-	async def create_access_token( self, data: dict, expires_delta: Optional[ float ] = None,
-			):
+	async def create_access_token( self, data: dict, expires_delta: Optional[ float ] = None, ):
 		to_encode = data.copy()
 		if expires_delta:
 			expire = datetime.now() + timedelta( seconds=expires_delta )
 		else:
 			expire = datetime.now() + timedelta( minutes=15 )
-		to_encode.update( { "iat": datetime.now(), "exp": expire, "scope": "access_token" },
-			)
+		to_encode.update( { "iat": datetime.now(), "exp": expire, "scope": "access_token" }, )
 		encoded_access_token = jwt.encode( to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM, )
 		return encoded_access_token
 
 	# define a function to generate a new refresh token
-	async def create_refresh_token( self, data: dict, expires_delta: Optional[ float ] = None,
-			):
+	async def create_refresh_token( self, data: dict, expires_delta: Optional[ float ] = None, ):
 		to_encode = data.copy()
 		if expires_delta:
 			expire = datetime.now() + timedelta( seconds=expires_delta )
 		else:
 			expire = datetime.now() + timedelta( days=7 )
-		to_encode.update( { "iat": datetime.now(), "exp": expire, "scope": "refresh_token" },
-			)
+		to_encode.update( { "iat": datetime.now(), "exp": expire, "scope": "refresh_token" }, )
 		encoded_refresh_token = jwt.encode( to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM, )
 		return encoded_refresh_token
 
@@ -63,8 +59,8 @@ class Auth:
 
 	async def get_current_user( self, token: str = Depends( oauth2_scheme ), db: AsyncSession = Depends( get_db ), ):
 		credentials_exception = HTTPException( status_code=status.HTTP_401_UNAUTHORIZED,
-			detail="Could not validate credentials",
-			headers={ "WWW-Authenticate": "Bearer" }, )
+		                                       detail="Could not validate credentials",
+		                                       headers={ "WWW-Authenticate": "Bearer" }, )
 
 		try:
 			# Decode JWT
@@ -82,6 +78,13 @@ class Auth:
 		if user is None:
 			raise credentials_exception
 		return user
+
+	def create_email_token( self, data: dict ):
+		to_encode = data.copy()
+		expire = datetime.now() + timedelta( minutes=15 )
+		to_encode.update( { "iat": datetime.now(), "exp": expire } )
+		token = jwt.encode( to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM )
+		return token
 
 
 auth_service = Auth()
