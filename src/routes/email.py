@@ -3,19 +3,16 @@ from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
-from src.entity.models import User
 from src.repository import email as repository_email
 from src.schemas.email import RequestEmail
 from src.services.auth import auth_service
 from src.services.email import send_email
 
-router = APIRouter( prefix="/mail", tags=[ "mail" ] )
+router = APIRouter( prefix="/email", tags=[ "email" ] )
 
 
 @router.get( "/confirmed_email/{token}" )
-async def confirm_email( token: str,
-                         db: AsyncSession = Depends( get_db ),
-                         current_user: User = Depends( auth_service.get_current_user ), ):
+async def confirm_email( token: str, db: AsyncSession = Depends( get_db ), ):
 	mail = await auth_service.get_email_from_token( token )
 	user = await repository_email.get_user_by_email( mail, db )
 	if not user:
@@ -30,8 +27,8 @@ async def confirm_email( token: str,
 async def request_email( body: RequestEmail,
                          background_tasks: BackgroundTasks,
                          request: Request,
-                         db: AsyncSession = Depends( get_db ),
-                         current_user: User = Depends( auth_service.get_current_user ), ):
+                         db: AsyncSession = Depends( get_db ), ):
+	print(f'body.email: {body.email}')
 	user = await repository_email.get_user_by_email( body.email, db )
 	if user.confirmed:
 		return { "message": "Email address already confirmed" }

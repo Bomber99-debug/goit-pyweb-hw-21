@@ -18,12 +18,12 @@ class Settings( BaseSettings ):
 	MAIL_FROM: str = "admin@web.com"
 	MAIL_FROM_NAME:str = "test"
 	MAIL_PORT: int = 1025
-	MAIL_HOST_IP: str = "localhost"
+	MAIL_SERVER: str = "localhost"
 	MAIL_STARTTLS: bool = False
 	MAIL_SSL_TLS: bool = False
 	USE_CREDENTIALS: bool = True
 	VALIDATE_CERTS:bool = True
-	TEMPLATE_FOLDER: Path = BASE_DIR / "src" / "service" / "templates"
+	TEMPLATE_FOLDER: Path = BASE_DIR / "src" / "services" / "templates"
 
 	""" Redis config """
 	REDIS_HOST_IP: str = "127.0.0.1"

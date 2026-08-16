@@ -3,13 +3,13 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
-from src.routes import auth, contacts, mail, phones, searchs
+from src.routes import auth, contacts, email, phones, searchs
 
 app = FastAPI()
 
 app.include_router( auth.router )
 app.include_router( contacts.router )
-app.include_router( mail.router )
+app.include_router( email.router )
 app.include_router( phones.router )
 app.include_router( searchs.router )
 
