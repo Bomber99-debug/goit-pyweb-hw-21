@@ -23,12 +23,11 @@ async def confirm_email( token: str, db: AsyncSession = Depends( get_db ), ):
 	return { "message": "Email address confirmed" }
 
 
-@router.get( "/request_email" )
+@router.post( "/request_email" )
 async def request_email( body: RequestEmail,
                          background_tasks: BackgroundTasks,
                          request: Request,
                          db: AsyncSession = Depends( get_db ), ):
-	print(f'body.email: {body.email}')
 	user = await repository_email.get_user_by_email( body.email, db )
 	if user.confirmed:
 		return { "message": "Email address already confirmed" }

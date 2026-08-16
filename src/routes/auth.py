@@ -18,14 +18,13 @@ async def signup( body: UserCreateSchema, bt: BackgroundTasks, request: Request,
 	exist_user = await users_repository.get_user_by_email( email=body.email, db=db )
 	if exist_user:
 		raise HTTPException( status_code=status.HTTP_409_CONFLICT, detail="Account already exists", )
+	bt.add_task( send_email, body.email, body.user_name, str( request.base_url ) )
 	body.password = auth_service.get_password_hash( body.password )
 	new_user = await users_repository.create_user( body=body, db=db )
-	bt.add_task( send_email, new_user.email, new_user.user_name, str( request.base_url ) )
 	return new_user
 
 
 @router.post( "/login", response_model=TokenShema )
-# @router.post("/login")
 async def login( body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends( get_db ),  # noqa: B008
                  ):
 	user = await users_repository.get_user_by_email( email=body.username, db=db )

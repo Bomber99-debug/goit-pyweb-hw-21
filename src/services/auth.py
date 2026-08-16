@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import Depends, HTTPException, status
@@ -29,10 +29,10 @@ class Auth:
 	async def create_access_token( self, data: dict, expires_delta: Optional[ float ] = None, ):
 		to_encode = data.copy()
 		if expires_delta:
-			expire = datetime.now() + timedelta( seconds=expires_delta )
+			expire = datetime.now( timezone.utc ) + timedelta( seconds=expires_delta )
 		else:
-			expire = datetime.now() + timedelta( minutes=15 )
-		to_encode.update( { "iat": datetime.now(), "exp": expire, "scope": "access_token" }, )
+			expire = datetime.now( timezone.utc ) + timedelta( minutes=15 )
+		to_encode.update( { "iat": datetime.now( timezone.utc ), "exp": expire, "scope": "access_token" }, )
 		encoded_access_token = jwt.encode( to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM, )
 		return encoded_access_token
 
@@ -40,10 +40,10 @@ class Auth:
 	async def create_refresh_token( self, data: dict, expires_delta: Optional[ float ] = None, ):
 		to_encode = data.copy()
 		if expires_delta:
-			expire = datetime.now() + timedelta( seconds=expires_delta )
+			expire = datetime.now( timezone.utc ) + timedelta( seconds=expires_delta )
 		else:
-			expire = datetime.now() + timedelta( days=7 )
-		to_encode.update( { "iat": datetime.now(), "exp": expire, "scope": "refresh_token" }, )
+			expire = datetime.now( timezone.utc ) + timedelta( days=7 )
+		to_encode.update( { "iat": datetime.now( timezone.utc ), "exp": expire, "scope": "refresh_token" }, )
 		encoded_refresh_token = jwt.encode( to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM, )
 		return encoded_refresh_token
 
@@ -81,8 +81,8 @@ class Auth:
 
 	def create_email_token( self, data: dict ):
 		to_encode = data.copy()
-		expire = datetime.now() + timedelta( days=1 )
-		to_encode.update( { "iat": datetime.now(), "exp": expire } )
+		expire = datetime.now( timezone.utc ) + timedelta( days=1 )
+		to_encode.update( { "iat": datetime.now( timezone.utc ), "exp": expire } )
 		token = jwt.encode( to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM )
 		return token
 

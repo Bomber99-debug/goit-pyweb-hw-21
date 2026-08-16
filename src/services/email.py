@@ -23,7 +23,24 @@ async def send_email( email: EmailStr, username: str, host: str ):
 		                         template_body={ "host": host, "username": username, "token": token_verification },
 		                         subtype=MessageType.html, )
 		fm = FastMail( config=mail_config )
-		print( f"token_verification: {token_verification}" )
 		await fm.send_message( message, template_name="verify_email.html" )
+	except ConnectionError as err:
+		print( err )
+
+
+async def send_email_add_contact( email_user: str,
+                                  user_name: str,
+                                  email_contact: str,
+                                  first_name: str,
+                                  last_name: str,
+                                  phones: list, ):
+	username = f'{first_name} {last_name}'
+	try:
+		message = MessageSchema( subject="Add Contact",
+		                         recipients=[ NameEmail( name=user_name, email=email_user ) ],
+		                         template_body={ "username": username, "email": email_contact, "phones": phones },
+		                         subtype=MessageType.html, )
+		fm = FastMail( config=mail_config )
+		await fm.send_message( message, template_name="add_contact.html" )
 	except ConnectionError as err:
 		print( err )
