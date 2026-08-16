@@ -22,6 +22,7 @@ async def send_email( email: EmailStr, username: str, host: str ):
 		                         template_body={ "host": host, "username": username, "token": token_verification },
 		                         subtype=MessageType.html, )
 		fm = FastMail( config=mail_config )
+		print( token_verification )
 		await fm.send_message( message, template_name="verify_email.html" )
 	except ConnectionError as err:
 		print( err )
