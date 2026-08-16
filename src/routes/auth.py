@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Security, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,18 +7,20 @@ from src.repository import users as users_repository
 from src.schemas.token import TokenShema
 from src.schemas.user import UserCreateSchema, UserResponseSchema
 from src.services.auth import auth_service
+from src.services.email import send_email
 
 router = APIRouter( prefix="/auth", tags=[ "auth" ], )
 get_refresh_token = HTTPBearer()
 
 
 @router.post( "/signup", response_model=UserResponseSchema, status_code=status.HTTP_201_CREATED, )
-async def signup( body: UserCreateSchema, db: AsyncSession = Depends( get_db ) ):
+async def signup( body: UserCreateSchema, bt: BackgroundTasks, request: Request, db: AsyncSession = Depends( get_db ) ):
 	exist_user = await users_repository.get_user_by_email( email=body.email, db=db )
 	if exist_user:
 		raise HTTPException( status_code=status.HTTP_409_CONFLICT, detail="Account already exists", )
 	body.password = auth_service.get_password_hash( body.password )
 	new_user = await users_repository.create_user( body=body, db=db )
+	bt.add_task( send_email, new_user.email, new_user.username, str( request.base_url ) )
 	return new_user
 
 
@@ -29,6 +31,8 @@ async def login( body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession =
 	user = await users_repository.get_user_by_email( email=body.username, db=db )
 	if user is None:
 		raise HTTPException( status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email", )
+	if not user.confirmed:
+		raise HTTPException( status_code=status.HTTP_401_UNAUTHORIZED, detail="Email not confirmed", )
 	if not auth_service.verify_password( body.password, user.password ):
 		raise HTTPException( status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password", )
 	# Generate JWT

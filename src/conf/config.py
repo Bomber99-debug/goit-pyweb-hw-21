@@ -1,9 +1,11 @@
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 class Settings( BaseSettings ):
-	""" DB connection settings """
+	""" DB connection config """
 	DB_URL: str = "sqlite:///db.sqlite3"
 
 	""" JWT config """
@@ -14,11 +16,20 @@ class Settings( BaseSettings ):
 	MAIL_USER: str = "test"
 	MAIL_PASSWORD: str = "test"
 	MAIL_FROM: str = "admin@web.com"
+	MAIL_FROM_NAME:str = "test"
 	MAIL_PORT: int = 1025
-	MAIL_SERVER: str = "localhost"
+	MAIL_HOST_IP: str = "localhost"
 	MAIL_STARTTLS: bool = False
 	MAIL_SSL_TLS: bool = False
 	USE_CREDENTIALS: bool = True
+	VALIDATE_CERTS:bool = True
+	TEMPLATE_FOLDER: Path = BASE_DIR / "src" / "service" / "templates"
+
+	""" Redis config """
+	REDIS_HOST_IP: str = "127.0.0.1"
+	REDIS_PORT: int = 6379
+	REDIS_USER: str = "default"
+	REDIS_PASSWORD: str = "123456"
 
 	@field_validator( "ALGORITHM" )
 	@classmethod

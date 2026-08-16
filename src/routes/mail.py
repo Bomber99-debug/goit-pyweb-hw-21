@@ -1,24 +1,28 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.database.db import get_db
+from src.entity.models import User
+from src.repository import email as repository_email
 from src.schemas.email import RequestEmail
 from src.services.auth import auth_service
 from src.services.email import send_email
-from src.database.db import get_db
-from src.repository import email
 
 router = APIRouter( prefix="/mail", tags=[ "mail" ] )
 
 
 @router.get( "/confirmed_email/{token}" )
-async def confirm_email( token: str, db: AsyncSession = Depends( get_db ) ):
-	email = await auth_service.get_email_from_token( token )
-	user = await email.get_user_by_email( email, db )
+async def confirm_email( token: str,
+                         db: AsyncSession = Depends( get_db ),
+                         current_user: User = Depends( auth_service.get_current_user ), ):
+	mail = await auth_service.get_email_from_token( token )
+	user = await repository_email.get_user_by_email( mail, db )
 	if not user:
 		raise HTTPException( status_code=status.HTTP_400_BAD_REQUEST, detail="Verification error" )
 	if user.confirmed:
 		return { "message": "Email address already confirmed" }
-	await email.confirm_email( email, db )
+	await repository_email.confirmed_email( mail, db )
 	return { "message": "Email address confirmed" }
 
 
@@ -26,10 +30,19 @@ async def confirm_email( token: str, db: AsyncSession = Depends( get_db ) ):
 async def request_email( body: RequestEmail,
                          background_tasks: BackgroundTasks,
                          request: Request,
-                         db: AsyncSession = Depends( get_db ), ):
-	user = await email.get_user_by_email( body.email, db )
+                         db: AsyncSession = Depends( get_db ),
+                         current_user: User = Depends( auth_service.get_current_user ), ):
+	user = await repository_email.get_user_by_email( body.email, db )
 	if user.confirmed:
 		return { "message": "Email address already confirmed" }
 	if user:
 		background_tasks.add_task( send_email, user.email, user.user_name, str( request.base_url ) )
 	return { "message": "Email address confirmed" }
+
+
+@router.get( '/{username}' )
+async def request_email( username: str, response: Response, db: AsyncSession = Depends( get_db ) ):
+	print( '--------------------------------' )
+	print( f'{username} зберігаємо що він відкрив email в БД' )
+	print( '--------------------------------' )
+	return FileResponse( "src/static/open_check.png", media_type="image/png", content_disposition_type="inline" )
