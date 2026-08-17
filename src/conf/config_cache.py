@@ -24,10 +24,12 @@ def custom_key_builder( func: Callable[ ..., Any ],
 	        f"contact:{contact_id}")
 
 
-async def invalidate_get_contact_repo_cech( current_user_id, contact_id ):
-	print( f"contact_id:get_contact_by_id:"
-	       f"current_user:{current_user_id}:"
-	       f"contact_id:{contact_id}", )
-	await FastAPICache.clear( namespace=f"contact_id:get_contact_by_id:"
-	                                    f"current_user:{current_user_id}:"
-	                                    f"contact_id:{contact_id}", )
+async def invalidate_get_contact_repo_cache( current_user_id: int, contact_id: int, ):
+	key = (f"{FastAPICache.get_prefix()}:"
+	       f"contact_id:"
+	       f"get_contact_by_id:"
+	       f"user:{current_user_id}:"
+	       f"contact:{contact_id}")
+
+	backend = FastAPICache.get_backend()
+	await backend.clear( key=key )
