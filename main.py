@@ -1,9 +1,10 @@
 from contextlib import asynccontextmanager
 
-from redis import asyncio as aioredis
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
+from redis import asyncio as aioredis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,12 +19,17 @@ async def lifespan( app: FastAPI ):
 	redis = aioredis.from_url( config.REDIS_URL )
 	FastAPICache.init( RedisBackend( redis ), prefix="fastapi-cache" )
 	yield
-	# Clean up the ML models and release the resources
-	# await redis.clear()
 
 
 app = FastAPI( lifespan=lifespan )
 
+origins = [ "*" ]
+
+app.add_middleware( CORSMiddleware,
+		allow_origins=origins,
+		allow_credentials=True,
+		allow_methods=[ "*" ],
+		allow_headers=[ "*" ], )
 
 app.include_router( auth.router )
 app.include_router( contacts.router )
