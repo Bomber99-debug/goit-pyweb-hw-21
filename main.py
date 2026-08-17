@@ -19,7 +19,7 @@ async def lifespan( app: FastAPI ):
 	FastAPICache.init( RedisBackend( redis ), prefix="fastapi-cache" )
 	yield
 	# Clean up the ML models and release the resources
-	await redis.clear()
+	# await redis.clear()
 
 
 app = FastAPI( lifespan=lifespan )
