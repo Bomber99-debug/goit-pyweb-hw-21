@@ -2,6 +2,7 @@ from collections.abc import Sequence
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
+from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
@@ -14,11 +15,12 @@ router = APIRouter( prefix="/searchs", tags=[ "search" ], )
 
 
 @router.get( "/", response_model=list[ ContactResponseSchema ], )
+@cache( expire=60, namespace="search" )
 async def search_contacts( query: Annotated[
 	str, Query( min_length=1, max_length=250, description="Ім'я, прізвище або електронна адреса контакту", ), ],
-		db: AsyncSession = Depends( get_db ),  # noqa: B008
-		current_user: User = Depends( auth_service.get_current_user ),  # noqa: B008
-		) -> Sequence[ Contact ]:
+                           db: AsyncSession = Depends( get_db ),  # noqa: B008
+                           current_user: User = Depends( auth_service.get_current_user ),  # noqa: B008
+                           ) -> Sequence[ Contact ]:
 	"""Шукає контакти за ім'ям, прізвищем або електронною адресою."""
 
 	contacts = await search_repository.search_contacts( db=db, query=query, user=current_user, )
@@ -27,9 +29,10 @@ async def search_contacts( query: Annotated[
 
 
 @router.get( "/birthday/", response_model=list[ ContactResponseSchema ], )
+@cache( expire=60, namespace="birthday" )
 async def get_contacts_with_upcoming_birthdays( db: AsyncSession = Depends( get_db ),  # noqa: B008
-		current_user: User = Depends( auth_service.get_current_user ),  # noqa: B008
-		) -> Sequence[ Contact ]:
+                                                current_user: User = Depends( auth_service.get_current_user ), ) -> \
+		Sequence[ Contact ]:
 	"""Повертає контакти з днями народження у найближчому періоді."""
 
 	contacts = await search_repository.get_contacts_with_upcoming_birthdays( db=db, user=current_user, )

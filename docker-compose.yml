@@ -43,6 +43,7 @@ services:
     environment:
       - DB_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_CONTAINER_PORT}/${POSTGRES_DB}
       - REDIS_HOST_IP=redis
+      - REDIS_URL=redis://${REDIS_USER}:${REDIS_PASSWORD}@redis:${REDIS_CONTAINER_PORT}/0
       - REDIS_PORT=${REDIS_CONTAINER_PORT}
       - REDIS_USER=${REDIS_USER}
       - MAIL_SERVER=email

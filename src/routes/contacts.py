@@ -4,6 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Path, Qu
 from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.conf.config_cache import custom_key_builder, invalidate_get_contact_repo_cech
 from src.database.db import get_db
 from src.entity.models import Contact, User
 from src.repository import contacts as contact_repository, phones as phones_repository
@@ -30,7 +31,7 @@ async def get_contacts( limit: int = Query( default=10, ge=10, le=100 ),
 
 
 @router.get( "/{contact_id}", response_model=ContactResponseSchema, )
-@cache( expire=60, namespace="contact_id" )
+@cache( expire=60, namespace="contact_id", key_builder=custom_key_builder )
 async def get_contact_by_id( db: AsyncSession = Depends( get_db ),
                              contact_id: int = Path( ge=1 ),
                              current_user: User = Depends( auth_service.get_current_user ), ) -> Contact:
@@ -79,11 +80,11 @@ async def update_contact( contact_data: ContactUpdateSchema,
                           ) -> Contact:
 	"""Оновлює контакт за його ідентифікатором."""
 
-	for phone_data in contact_data.phones:
-		phone = await phones_repository.get_phone_by_number( db=db, phone_number=phone_data.number,
-		                                                     user=current_user, )
-		if phone is not None:
-			raise HTTPException( status_code=status.HTTP_409_CONFLICT, detail="Phone already exists", )
+	# for phone_data in contact_data.phones:
+	# 	phone = await phones_repository.get_phone_by_number( db=db, phone_number=phone_data.number,
+	# 	                                                     user=current_user, )
+	# 	if phone is not None:
+	# 		raise HTTPException( status_code=status.HTTP_409_CONFLICT, detail="Phone already exists", )
 
 	contact = await contact_repository.update_contact( db=db,
 	                                                   contact_data=contact_data,
@@ -92,6 +93,8 @@ async def update_contact( contact_data: ContactUpdateSchema,
 
 	if contact is None:
 		raise HTTPException( status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found", )
+
+	await invalidate_get_contact_repo_cech( current_user_id=current_user.id, contact_id=contact_id )
 
 	return contact
 
