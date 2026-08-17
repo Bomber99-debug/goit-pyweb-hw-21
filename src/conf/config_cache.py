@@ -17,7 +17,8 @@ def custom_key_builder( func: Callable[ ..., Any ],
                         kwargs: Dict[ str, Any ], ) -> str:
 	current_user = kwargs.get( "current_user" )
 	contact_id = kwargs.get( "contact_id" )
-
+	print( f"contact_id:{contact_id}", )
+	print( f"current_user:{current_user}", )
 	return (f"{namespace}:"
 	        f"{func.__name__}:"
 	        f"user:{current_user.id}:"

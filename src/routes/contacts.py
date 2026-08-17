@@ -4,7 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Path, Qu
 from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.conf.config_cache import custom_key_builder, invalidate_get_contact_repo_cech
+from src.conf.config_cache import custom_key_builder, invalidate_get_contact_repo_cache
 from src.database.db import get_db
 from src.entity.models import Contact, User
 from src.repository import contacts as contact_repository, phones as phones_repository
@@ -94,7 +94,7 @@ async def update_contact( contact_data: ContactUpdateSchema,
 	if contact is None:
 		raise HTTPException( status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found", )
 
-	await invalidate_get_contact_repo_cech( current_user_id=current_user.id, contact_id=contact_id )
+	await invalidate_get_contact_repo_cache( current_user_id=current_user.id, contact_id=contact_id )
 
 	return contact
 
