@@ -4,7 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Path, Qu
 from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.conf.config_cache import custom_key_builder, invalidate_get_contact_repo_cache
+from src.conf.config_cache import custom_contact_key_builder, invalidate_get_contact_repo_cache, custom_contacts_key_builder
 from src.database.db import get_db
 from src.entity.models import Contact, User
 from src.repository import contacts as contact_repository, phones as phones_repository
@@ -16,6 +16,7 @@ router = APIRouter( prefix="/contacts", tags=[ "contacts" ], )
 
 
 @router.get( "/", response_model=list[ ContactResponseSchema ], )
+@cache( expire=60, namespace="contact_id", key_builder=custom_contacts_key_builder )
 async def get_contacts( limit: int = Query( default=10, ge=10, le=100 ),
                         offset: int = Query( default=0, ge=0 ),
                         db: AsyncSession = Depends( get_db ),
@@ -31,7 +32,7 @@ async def get_contacts( limit: int = Query( default=10, ge=10, le=100 ),
 
 
 @router.get( "/{contact_id}", response_model=ContactResponseSchema, )
-@cache( expire=660, namespace="contact_id", key_builder=custom_key_builder )
+@cache( expire=60, namespace="contact_id", key_builder=custom_contact_key_builder )
 async def get_contact_by_id( db: AsyncSession = Depends( get_db ),
                              contact_id: int = Path( ge=1 ),
                              current_user: User = Depends( auth_service.get_current_user ), ) -> Contact:
@@ -104,5 +105,7 @@ async def delete_contact( db: AsyncSession = Depends( get_db ),
                           contact_id: int = Path( ge=1 ),
                           current_user: User = Depends( auth_service.get_current_user ), ) -> None:
 	"""Видаляє контакт за його ідентифікатором."""
+
+	await invalidate_get_contact_repo_cache( current_user_id=current_user.id, contact_id=contact_id )
 
 	await contact_repository.delete_contact( db=db, contact_id=contact_id, user=current_user, )

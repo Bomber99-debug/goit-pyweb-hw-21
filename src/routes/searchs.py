@@ -10,16 +10,17 @@ from src.entity.models import Contact, User
 from src.repository import searchs as search_repository
 from src.schemas.contacts import ContactResponseSchema
 from src.services.auth import auth_service
+from src.conf.config_cache import custom_search_key_builder
 
 router = APIRouter( prefix="/searchs", tags=[ "search" ], )
 
 
 @router.get( "/", response_model=list[ ContactResponseSchema ], )
-@cache( expire=60, namespace="search" )
+@cache( expire=60, namespace="search", key_builder=custom_search_key_builder )
 async def search_contacts( query: Annotated[
 	str, Query( min_length=1, max_length=250, description="Ім'я, прізвище або електронна адреса контакту", ), ],
-                           db: AsyncSession = Depends( get_db ),  # noqa: B008
-                           current_user: User = Depends( auth_service.get_current_user ),  # noqa: B008
+                           db: AsyncSession = Depends( get_db ),
+                           current_user: User = Depends( auth_service.get_current_user ),
                            ) -> Sequence[ Contact ]:
 	"""Шукає контакти за ім'ям, прізвищем або електронною адресою."""
 
@@ -29,8 +30,8 @@ async def search_contacts( query: Annotated[
 
 
 @router.get( "/birthday/", response_model=list[ ContactResponseSchema ], )
-@cache( expire=60, namespace="birthday" )
-async def get_contacts_with_upcoming_birthdays( db: AsyncSession = Depends( get_db ),  # noqa: B008
+@cache( expire=60, namespace="birthday", key_builder=custom_search_key_builder )
+async def get_contacts_with_upcoming_birthdays( db: AsyncSession = Depends( get_db ),
                                                 current_user: User = Depends( auth_service.get_current_user ), ) -> \
 		Sequence[ Contact ]:
 	"""Повертає контакти з днями народження у найближчому періоді."""

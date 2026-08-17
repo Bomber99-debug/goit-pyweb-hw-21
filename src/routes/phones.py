@@ -4,22 +4,22 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.conf.config_cache import custom_phone_key_builder, custom_phones_key_builder, invalidate_get_phone_repo_cache
 from src.database.db import get_db
 from src.entity.models import Phone, User
 from src.repository import phones as phones_repository
-from src.schemas.contacts import (PhoneCreateSchema, PhoneResponseSchema, PhoneUpdateSchema,
-                                  )
+from src.schemas.contacts import (PhoneCreateSchema, PhoneResponseSchema, PhoneUpdateSchema)
 from src.services.auth import auth_service
 
 router = APIRouter( prefix="/phone", tags=[ "phone" ], )
 
 
 @router.get( "/", response_model=list[ PhoneResponseSchema ], )
+@cache( expire=60, namespace="phone_id", key_builder=custom_phones_key_builder )
 async def get_phones( limit: int = Query( default=10, ge=10, le=100 ),
-		offset: int = Query( default=0, ge=0 ),
-		db: AsyncSession = Depends( get_db ),  # noqa: B008
-		current_user: User = Depends( auth_service.get_current_user ),  # noqa: B008
-		) -> Sequence[ Phone ]:
+                      offset: int = Query( default=0, ge=0 ),
+                      db: AsyncSession = Depends( get_db ),
+                      current_user: User = Depends( auth_service.get_current_user ), ) -> Sequence[ Phone ]:
 	"""Повертає список телефонних номерів з урахуванням пагінації."""
 
 	phone_list = await phones_repository.get_phones( db=db, skip=offset, limit=limit, user=current_user, )
@@ -31,10 +31,10 @@ async def get_phones( limit: int = Query( default=10, ge=10, le=100 ),
 
 
 @router.get( "/{phone_id}", response_model=PhoneResponseSchema, )
-@cache( expire=60, namespace="phone_id" )
-async def get_phone_by_id( db: AsyncSession = Depends( get_db ),  # noqa: B008
-		phone_id: int = Path( ge=1 ), current_user: User = Depends( auth_service.get_current_user ),  # noqa: B008
-		) -> Phone:
+@cache( expire=60, namespace="phone_id", key_builder=custom_phone_key_builder )
+async def get_phone_by_id( db: AsyncSession = Depends( get_db ),
+                           phone_id: int = Path( ge=1 ),
+                           current_user: User = Depends( auth_service.get_current_user ), ) -> Phone:
 	"""Повертає телефонний номер за його ідентифікатором."""
 
 	phone = await phones_repository.get_phone_by_id( db=db, phone_id=phone_id, user=current_user, )
@@ -46,9 +46,9 @@ async def get_phone_by_id( db: AsyncSession = Depends( get_db ),  # noqa: B008
 
 
 @router.post( "/", response_model=PhoneCreateSchema, status_code=status.HTTP_201_CREATED, )
-async def create_phone( phone_data: PhoneCreateSchema, db: AsyncSession = Depends( get_db ),  # noqa: B008
-		current_user: User = Depends( auth_service.get_current_user ),  # noqa: B008
-		) -> Phone:
+async def create_phone( phone_data: PhoneCreateSchema,
+                        db: AsyncSession = Depends( get_db ),
+                        current_user: User = Depends( auth_service.get_current_user ), ) -> Phone:
 	"""Створює новий телефонний номер."""
 
 	phone = await phones_repository.get_phone_by_number( db=db, phone_number=phone_data.number, user=current_user, )
@@ -62,10 +62,9 @@ async def create_phone( phone_data: PhoneCreateSchema, db: AsyncSession = Depend
 
 @router.put( "/{phone_id}", response_model=PhoneUpdateSchema, )
 async def update_phone( phone_data: PhoneUpdateSchema,
-		phone_id: int = Path( ge=1 ),
-		db: AsyncSession = Depends( get_db ),  # noqa: B008
-		current_user: User = Depends( auth_service.get_current_user ),  # noqa: B008
-		) -> Phone:
+                        phone_id: int = Path( ge=1 ),
+                        db: AsyncSession = Depends( get_db ),
+                        current_user: User = Depends( auth_service.get_current_user ), ) -> Phone:
 	"""Оновлює телефонний номер за його ідентифікатором."""
 
 	phone = await phones_repository.get_phone_by_number( db=db, phone_number=phone_data.number, user=current_user, )
@@ -77,13 +76,17 @@ async def update_phone( phone_data: PhoneUpdateSchema,
 	if phone is None:
 		raise HTTPException( status_code=status.HTTP_404_NOT_FOUND, detail="Phone not found", )
 
+	await invalidate_get_phone_repo_cache( current_user_id=current_user.id, phone_id=phone_id )
+
 	return phone
 
 
 @router.delete( "/{phone_id}", status_code=status.HTTP_204_NO_CONTENT, )
-async def delete_phone( db: AsyncSession = Depends( get_db ),  # noqa: B008
-		phone_id: int = Path( ge=1 ), current_user: User = Depends( auth_service.get_current_user ),  # noqa: B008
-		) -> None:
+async def delete_phone( db: AsyncSession = Depends( get_db ),
+                        phone_id: int = Path( ge=1 ),
+                        current_user: User = Depends( auth_service.get_current_user ), ) -> None:
 	"""Видаляє телефонний номер за його ідентифікатором."""
+
+	await invalidate_get_phone_repo_cache( current_user_id=current_user.id, phone_id=phone_id )
 
 	await phones_repository.delete_phone( db=db, phone_id=phone_id, user=current_user )
