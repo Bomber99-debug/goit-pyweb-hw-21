@@ -31,7 +31,7 @@ async def get_contacts( limit: int = Query( default=10, ge=10, le=100 ),
 
 
 @router.get( "/{contact_id}", response_model=ContactResponseSchema, )
-@cache( expire=60, namespace="contact_id", key_builder=custom_key_builder )
+@cache( expire=660, namespace="contact_id", key_builder=custom_key_builder )
 async def get_contact_by_id( db: AsyncSession = Depends( get_db ),
                              contact_id: int = Path( ge=1 ),
                              current_user: User = Depends( auth_service.get_current_user ), ) -> Contact:
