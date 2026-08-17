@@ -1,6 +1,7 @@
 from collections.abc import Sequence
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Path, Query, Request, status
+from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
@@ -29,10 +30,13 @@ async def get_contacts( limit: int = Query( default=10, ge=10, le=100 ),
 
 
 @router.get( "/{contact_id}", response_model=ContactResponseSchema, )
+@cache(expire=60, namespace="contact_id")
 async def get_contact_by_id( db: AsyncSession = Depends( get_db ),
                              contact_id: int = Path( ge=1 ),
                              current_user: User = Depends( auth_service.get_current_user ), ) -> Contact:
 	"""Повертає контакт за його ідентифікатором."""
+
+
 
 	contact = await contact_repository.get_contact_by_id( db=db, contact_id=contact_id, user=current_user, )
 

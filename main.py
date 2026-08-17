@@ -1,11 +1,29 @@
+from contextlib import asynccontextmanager
+
+from redis import asyncio as aioredis
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.conf.config import config
 from src.database.db import get_db
 from src.routes import auth, contacts, email, phones, searchs
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan( app: FastAPI ):
+	# Start event
+	redis = aioredis.from_url( config.REDIS_URL )
+	FastAPICache.init( RedisBackend( redis ), prefix="fastapi-cache" )
+	yield
+	# Clean up the ML models and release the resources
+	await redis.clear()
+
+
+app = FastAPI( lifespan=lifespan )
+
 
 app.include_router( auth.router )
 app.include_router( contacts.router )

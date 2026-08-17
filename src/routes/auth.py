@@ -25,8 +25,7 @@ async def signup( body: UserCreateSchema, bt: BackgroundTasks, request: Request,
 
 
 @router.post( "/login", response_model=TokenShema )
-async def login( body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends( get_db ),  # noqa: B008
-                 ):
+async def login( body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends( get_db ) ):
 	user = await users_repository.get_user_by_email( email=body.username, db=db )
 	if user is None:
 		raise HTTPException( status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email", )

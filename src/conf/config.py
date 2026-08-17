@@ -30,6 +30,7 @@ class Settings( BaseSettings ):
 	REDIS_PORT: int = 6379
 	REDIS_USER: str = "default"
 	REDIS_PASSWORD: str = "123456"
+	REDIS_URL:str = f"redis://{REDIS_HOST_IP}:{REDIS_PORT}/0"
 
 	@field_validator( "ALGORITHM" )
 	@classmethod
