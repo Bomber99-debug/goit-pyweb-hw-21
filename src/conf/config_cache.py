@@ -15,18 +15,19 @@ def custom_key_builder( func: Callable[ ..., Any ],
                         response: Optional[ Response ] = None,
                         args: Tuple[ Any, ... ],
                         kwargs: Dict[ str, Any ], ) -> str:
-	params = kwargs.copy()
-	params.pop( 'db', None )
-	if 'current_user' in params:
-		params[ 'current_user' ] = params[ 'current_user' ].id
-	key_parts = [ namespace, func.__name__ ] + [ f"{k}:{v}" for k, v in params.items() ]
-	return ":".join( key_parts )
+	current_user = kwargs.get( "current_user" )
+	contact_id = kwargs.get( "contact_id" )
+
+	return (f"{namespace}:"
+	        f"{func.__name__}:"
+	        f"user:{current_user.id}:"
+	        f"contact:{contact_id}")
 
 
 async def invalidate_get_contact_repo_cech( current_user_id, contact_id ):
-	print( f"fastapi-cache:contact_id:get_contact_by_id:"
+	print( f"contact_id:get_contact_by_id:"
 	       f"current_user:{current_user_id}:"
 	       f"contact_id:{contact_id}", )
-	await FastAPICache.clear( namespace=f"fastapi-cache:contact_id:get_contact_by_id:"
+	await FastAPICache.clear( namespace=f"contact_id:get_contact_by_id:"
 	                                    f"current_user:{current_user_id}:"
 	                                    f"contact_id:{contact_id}", )
