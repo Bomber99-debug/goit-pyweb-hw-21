@@ -2,6 +2,8 @@ from collections.abc import Sequence
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Path, Query, Request, status
 from fastapi_cache.decorator import cache
+from fastapi_limiter.depends import RateLimiter
+from pyrate_limiter import Duration, Limiter, Rate
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.conf.config_cache import (custom_contact_key_builder,
@@ -18,7 +20,9 @@ from src.services.email import send_email_add_contact
 router = APIRouter( prefix="/contacts", tags=[ "contacts" ], )
 
 
-@router.get( "/", response_model=list[ ContactResponseSchema ], )
+@router.get( "/",
+             response_model=list[ ContactResponseSchema ],
+             dependencies=[ Depends( RateLimiter( limiter=Limiter( Rate( 1, Duration.SECOND * 5, ), ), ), ), ], )
 @cache( expire=60, namespace="contact_id", key_builder=custom_contacts_key_builder )
 async def get_contacts( limit: int = Query( default=10, ge=10, le=100 ),
                         offset: int = Query( default=0, ge=0 ),
