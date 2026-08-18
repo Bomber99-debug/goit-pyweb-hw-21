@@ -2,7 +2,6 @@ from collections.abc import Sequence
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Path, Query, Request, status
 from fastapi_cache.decorator import cache
-from fastapi_limiter.depends import RateLimiter
 from pyrate_limiter import Duration, Limiter, Rate
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +15,7 @@ from src.repository import contacts as contact_repository, phones as phones_repo
 from src.schemas.contacts import ContactCreateSchema, ContactResponseSchema, ContactUpdateSchema
 from src.services.auth import auth_service
 from src.services.email import send_email_add_contact
+from src.services.rate_limiter import RateLimiter
 
 router = APIRouter( prefix="/contacts", tags=[ "contacts" ], )
 
