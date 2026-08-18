@@ -7,6 +7,16 @@ from passlib.context import CryptContext
 
 pwd_context = CryptContext( schemes=[ "bcrypt" ], deprecated="auto" )
 
+def custom_login_key_builder( func: Callable[ ..., Any ],
+                                 namespace: str = "",
+                                 *,
+                                 request: Optional[ Request ] = None,
+                                 response: Optional[ Response ] = None,
+                                 args: Tuple[ Any, ... ],
+                                 kwargs: Dict[ str, Any ], ) -> str:
+	body = kwargs.get("body")
+	print(f"kwargs:{kwargs}")
+	return (f"body:{body}")
 
 def custom_contacts_key_builder( func: Callable[ ..., Any ],
                                  namespace: str = "",
@@ -17,10 +27,12 @@ def custom_contacts_key_builder( func: Callable[ ..., Any ],
                                  kwargs: Dict[ str, Any ], ) -> str:
 	current_user = kwargs.get( "current_user" )
 	limit = kwargs.get( "limit" )
+	offset = kwargs.get( "offset" )
 	return (f"{namespace}:"
 	        f"{func.__name__}:"
 	        f"user:{current_user.id}:"
-	        f"limit:{limit}")
+	        f"limit:{limit}"
+	        f"offset:{offset}")
 
 
 def custom_contact_key_builder( func: Callable[ ..., Any ],
@@ -58,10 +70,12 @@ def custom_phones_key_builder( func: Callable[ ..., Any ],
                                kwargs: Dict[ str, Any ], ) -> str:
 	current_user = kwargs.get( "current_user" )
 	limit = kwargs.get( "limit" )
+	offset = kwargs.get( "offset" )
 	return (f"{namespace}:"
 	        f"{func.__name__}:"
 	        f"user:{current_user.id}:"
-	        f"limit:{limit}")
+	        f"limit:{limit}"
+	        f"offset:{offset}")
 
 
 def custom_phone_key_builder( func: Callable[ ..., Any ],

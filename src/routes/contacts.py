@@ -4,7 +4,10 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Path, Qu
 from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.conf.config_cache import custom_contact_key_builder, invalidate_get_contact_repo_cache, custom_contacts_key_builder
+from src.conf.config_cache import (custom_contact_key_builder,
+                                   custom_contacts_key_builder,
+                                   invalidate_get_contact_repo_cache,
+                                   )
 from src.database.db import get_db
 from src.entity.models import Contact, User
 from src.repository import contacts as contact_repository, phones as phones_repository
@@ -63,13 +66,12 @@ async def create_contact( contact_data: ContactCreateSchema,
 
 	contact = await contact_repository.create_contact( db=db, contact_data=contact_data, user=current_user, )
 	bt.add_task( send_email_add_contact,
-	             current_user.email,
-	             current_user.user_name,
-	             contact_data.email,
-	             contact_data.first_name,
-	             contact_data.last_name,
-	             contact_data.phones,
-	             str( request.base_url ), )
+	             email_user=current_user.email,
+	             user_name=current_user.user_name,
+	             email_contact=contact_data.email,
+	             first_name=contact_data.first_name,
+	             last_name=contact_data.last_name,
+	             phones=contact_data.phones, )
 	return contact
 
 
@@ -80,12 +82,6 @@ async def update_contact( contact_data: ContactUpdateSchema,
                           current_user: User = Depends( auth_service.get_current_user ),  # noqa: B008
                           ) -> Contact:
 	"""Оновлює контакт за його ідентифікатором."""
-
-	# for phone_data in contact_data.phones:
-	# 	phone = await phones_repository.get_phone_by_number( db=db, phone_number=phone_data.number,
-	# 	                                                     user=current_user, )
-	# 	if phone is not None:
-	# 		raise HTTPException( status_code=status.HTTP_409_CONFLICT, detail="Phone already exists", )
 
 	contact = await contact_repository.update_contact( db=db,
 	                                                   contact_data=contact_data,
