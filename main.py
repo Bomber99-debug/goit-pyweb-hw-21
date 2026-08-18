@@ -4,20 +4,19 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-from redis import asyncio as aioredis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.conf.config import config
 from src.database.db import get_db
+from src.database.redis import redis_client
 from src.routes import auth, contacts, email, phones, searchs
 
 
 @asynccontextmanager
 async def lifespan( app: FastAPI ):
+	await redis_client.ping()
 	# Start event
-	redis = aioredis.from_url( config.REDIS_URL )
-	FastAPICache.init( RedisBackend( redis ), prefix="fastapi-cache" )
+	FastAPICache.init( RedisBackend( redis_client ), prefix="fastapi-cache" )
 	yield
 
 
@@ -26,10 +25,10 @@ app = FastAPI( lifespan=lifespan )
 origins = [ "*" ]
 
 app.add_middleware( CORSMiddleware,
-		allow_origins=origins,
-		allow_credentials=True,
-		allow_methods=[ "*" ],
-		allow_headers=[ "*" ], )
+                    allow_origins=origins,
+                    allow_credentials=True,
+                    allow_methods=[ "*" ],
+                    allow_headers=[ "*" ], )
 
 app.include_router( auth.router )
 app.include_router( contacts.router )
