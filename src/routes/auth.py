@@ -1,9 +1,7 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordRequestForm
-from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.conf.config_cache import custom_login_key_builder
 from src.database.db import get_db
 from src.repository import users as users_repository
 from src.schemas.token import TokenShema
@@ -27,7 +25,6 @@ async def signup( body: UserCreateSchema, bt: BackgroundTasks, request: Request,
 
 
 @router.post( "/login", response_model=TokenShema )
-@cache( expire=3600, namespace="login", key_builder=custom_login_key_builder )
 async def login( body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends( get_db ) ):
 	user = await users_repository.get_user_by_email( email=body.username, db=db )
 	if user is None:
@@ -38,7 +35,6 @@ async def login( body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession =
 		raise HTTPException( status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password", )
 	# Generate JWT
 	access_token = await auth_service.create_access_token( data={ "sub": user.email } )
-	print( f"access_token:{access_token}", )
 	refresh_token = await auth_service.create_refresh_token( data={ "sub": user.email } )
 	await users_repository.update_token( user=user, token=refresh_token, db=db )
 	return { "access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer",

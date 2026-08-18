@@ -223,3 +223,6 @@ log_file.txt
 logging.log
 
 config.ini
+
+cash/
+DB/

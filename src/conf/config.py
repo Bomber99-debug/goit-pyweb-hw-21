@@ -16,9 +16,9 @@ class Settings( BaseSettings ):
 	MAIL_USER: str = "test"
 	MAIL_PASSWORD: str = "test"
 	MAIL_FROM: str = "admin@web.com"
+	MAIL_SERVER: str = "localhost"
 	MAIL_FROM_NAME:str = "test"
 	MAIL_PORT: int = 1025
-	MAIL_SERVER: str = "localhost"
 	MAIL_STARTTLS: bool = False
 	MAIL_SSL_TLS: bool = False
 	USE_CREDENTIALS: bool = True
@@ -26,11 +26,12 @@ class Settings( BaseSettings ):
 	TEMPLATE_FOLDER: Path = BASE_DIR / "src" / "services" / "templates"
 
 	""" Redis config """
-	REDIS_HOST_IP: str = "127.0.0.1"
-	REDIS_PORT: int = 6379
 	REDIS_USER: str = "default"
 	REDIS_PASSWORD: str = "123456"
-	REDIS_URL:str = f"redis://{REDIS_USER}:{REDIS_PASSWORD}@{REDIS_HOST_IP}:{REDIS_PORT}/0"
+	REDIS_HOST_IP: str = "127.0.0.1"
+	REDIS_PORT: int = 6379
+	REDIS_DB: int = 0
+	REDIS_URL:str = f"redis://{REDIS_USER}:{REDIS_PASSWORD}@{REDIS_HOST_IP}:{REDIS_PORT}/{REDIS_DB}"
 
 	@field_validator( "ALGORITHM" )
 	@classmethod
