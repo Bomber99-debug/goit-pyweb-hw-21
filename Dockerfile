@@ -7,9 +7,11 @@ RUN pip install --no-cache-dir "poetry>=2,<3"
 
 ENV POETRY_VIRTUALENVS_CREATE=false
 
-COPY pyproject.toml ./
+#COPY pyproject.toml ./
+COPY pyproject.toml poetry.lock ./
 
-RUN poetry install --no-root
+RUN poetry install --no-root \
+    && python -m pip install --no-cache-dir --force-reinstall "redis==8.0.1"
 
 COPY . .
 

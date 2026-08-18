@@ -38,7 +38,9 @@ async def get_contacts( limit: int = Query( default=10, ge=10, le=100 ),
 	return contact_list
 
 
-@router.get( "/{contact_id}", response_model=ContactResponseSchema, )
+@router.get( "/{contact_id}",
+             response_model=ContactResponseSchema,
+             dependencies=[ Depends( RateLimiter( limiter=Limiter( Rate( 1, Duration.SECOND * 5, ), ), ), ), ], )
 @cache( expire=60, namespace="contact_id", key_builder=custom_contact_key_builder )
 async def get_contact_by_id( db: AsyncSession = Depends( get_db ),
                              contact_id: int = Path( ge=1 ),
