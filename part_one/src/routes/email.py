@@ -18,7 +18,7 @@ router = APIRouter( prefix="/email", tags=[ "email" ] )
 async def confirm_email( token: str, db: AsyncSession = Depends( get_db ), ):
 	mail = await auth_service.get_email_from_token( token )
 	user = await repository_email.get_user_by_email( mail, db )
-	if not user:
+	if user is None:
 		raise HTTPException( status_code=status.HTTP_400_BAD_REQUEST, detail="Verification error" )
 	if user.confirmed:
 		return { "message": "Email address already confirmed" }
