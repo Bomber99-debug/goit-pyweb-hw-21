@@ -39,11 +39,6 @@ class Settings( BaseSettings ):
 	CLOUDINARY_CLOUD_NAME: str = "my_cloud_name"
 	CLOUDINARY_API_KEY: str = "my_key"
 	CLOUDINARY_API_SECRET: str = "my_secret"
-	CLOUDINARY_SECURE_DISTRIBUTION: str = "mydomain.com"
-	CLOUDINARY_UPLOAD_PREFIX : str= "my_prefix"
-	BASE_CLOUDINARY_URL: str = f"cloudinary://{CLOUDINARY_API_KEY}:{CLOUDINARY_API_SECRET}@{CLOUDINARY_CLOUD_NAME}"
-	CLOUDINARY_URL: str = (f"{BASE_CLOUDINARY_URL}?secure_distribution={CLOUDINARY_SECURE_DISTRIBUTION}&"
-	                  f"upload_prefix ={CLOUDINARY_UPLOAD_PREFIX}")
 
 	@field_validator( "ALGORITHM" )
 	@classmethod
