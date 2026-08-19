@@ -3,7 +3,6 @@ from libgravatar import Gravatar
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from entity.models import User
 from src.database.db import get_db
 from src.entity.models import User
 from src.schemas.user import UserCreateSchema
