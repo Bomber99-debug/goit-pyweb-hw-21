@@ -33,7 +33,7 @@ services:
 
   fastapi:
     build:
-      context: .
+      context: ..
       dockerfile: part_one/Dockerfile
       network: host
     volumes:
