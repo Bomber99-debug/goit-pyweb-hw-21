@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
-from . import conect_setings
+from config import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -78,11 +78,11 @@ WSGI_APPLICATION = 'quotes_and_authors.wsgi.application'
 DATABASES = {
 		"default": {
 				"ENGINE"  : "django.db.backends.postgresql_psycopg2",
-				"NAME"    : conect_setings.db_name,
-				"USER"    : conect_setings.user,
-				"PASSWORD": conect_setings.password,
-				"HOST"    : conect_setings.host,
-				"PORT"    : conect_setings.port,
+				"NAME"    : config.POSTGRES_DB,
+				"USER"    : config.POSTGRES_USER,
+				"PASSWORD": config.POSTGRES_PASSWORD,
+				"HOST"    : config.POSTGRES_HOST_IP,
+				"PORT"    : config.POSTGRES_PORT,
 				},
 		}
 
