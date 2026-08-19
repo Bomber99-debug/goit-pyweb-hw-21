@@ -1,0 +1,136 @@
+{% extends 'quotes_and_authors/base.html' %}
+{% load static %}
+
+{% block title %}
+    <title>External Sources</title>
+{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'external_sources/style.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+
+                <div class="p-4 p-md-5 mb-4 rounded-3 bg-body-tertiary border shadow-sm">
+                    <div class="container-fluid py-2">
+                        <h1 class="display-6 fw-bold mb-3">External Sources</h1>
+                        <p class="col-md-10 fs-5 text-muted mb-0">
+                            Import quotes, authors and tags from external sources into your Django database.
+                        </p>
+                    </div>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm"
+                             role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if len_tags or len_author or len_quotes %}
+                    <div class="alert alert-success shadow-sm" role="alert">
+                        <h5 class="alert-heading mb-3">Scraping completed</h5>
+
+                        <div class="row text-center g-3">
+                            <div class="col-md-4">
+                                <div class="border rounded-3 bg-white p-3 h-100">
+                                    <div class="fs-3 fw-bold">{{ len_quotes }}</div>
+                                    <div class="text-muted">Quotes</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="border rounded-3 bg-white p-3 h-100">
+                                    <div class="fs-3 fw-bold">{{ len_author }}</div>
+                                    <div class="text-muted">Authors</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="border rounded-3 bg-white p-3 h-100">
+                                    <div class="fs-3 fw-bold">{{ len_tags }}</div>
+                                    <div class="text-muted">Tags</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body p-4">
+                                <span class="badge text-bg-primary mb-3">MongoDB</span>
+
+                                <h2 class="h4 card-title">MongoDB Import</h2>
+
+                                <p class="card-text text-muted">
+                                    Import existing authors and quotes from your MongoDB collections into PostgreSQL.
+                                </p>
+
+                                <ul class="list-group list-group-flush mb-4">
+                                    <li class="list-group-item px-0">
+                                        Uses collections: <strong>author</strong> and <strong>quote</strong>
+                                    </li>
+                                    <li class="list-group-item px-0">
+                                        Creates authors, quotes and tags
+                                    </li>
+                                    <li class="list-group-item px-0">
+                                        Requires MongoDB connection data
+                                    </li>
+                                </ul>
+
+                                <a class="btn btn-primary w-100"
+                                   href="{% url 'external_sources:mongo_import' %}">
+                                    Open MongoDB import
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body p-4">
+                                <span class="badge text-bg-success mb-3">Scraping</span>
+
+                                <h2 class="h4 card-title">quotes.toscrape.com</h2>
+
+                                <p class="card-text text-muted">
+                                    Scrape quotes, authors and tags directly from quotes.toscrape.com
+                                    and save them to the database.
+                                </p>
+
+                                <ul class="list-group list-group-flush mb-4">
+                                    <li class="list-group-item px-0">
+                                        Loads all quote pages
+                                    </li>
+                                    <li class="list-group-item px-0">
+                                        Parses author detail pages
+                                    </li>
+                                    <li class="list-group-item px-0">
+                                        Saves data through Django ORM
+                                    </li>
+                                </ul>
+
+                                <form method="POST" action="{% url 'external_sources:scrapi_import' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success w-100">
+                                        Start scraping import
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

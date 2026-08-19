@@ -116,12 +116,9 @@ async def delete_phone( db: AsyncSession = Depends( get_db ),
                         phone_id: int = Path( ge=1 ),
                         current_user: User = Depends( auth_service.get_current_user ), ) -> None:
 	"""Видаляє телефонний номер за його ідентифікатором."""
+	await phones_repository.delete_phone( db=db, phone_id=phone_id, user=current_user )
 
 	await redis_client.delete( f"current_user:{current_user.id}:phone_id:{phone_id}" )
-	patterns = [ f"current_user:{current_user.id}:phones:*", f"current_user:{current_user.id}:contacts:*",
-	             ]
-
+	patterns = [ f"current_user:{current_user.id}:phones:*", f"current_user:{current_user.id}:contacts:*" ]
 	async for key in redis_client.scan_iter( match=patterns ):
 		await redis_client.delete( key )
-
-	await phones_repository.delete_phone( db=db, phone_id=phone_id, user=current_user )

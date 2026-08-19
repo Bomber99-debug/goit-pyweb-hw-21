@@ -1,0 +1,101 @@
+{% extends 'quotes_and_authors/base.html' %}
+
+{% block title %}
+    <title>Quotes</title>
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-lg-8">
+                <h1 class="mb-4">Quotes</h1>
+
+                {% for quote in quotes %}
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body">
+                            <blockquote class="blockquote mb-3">
+                                <p class="mb-0">“{{ quote.quote }}”</p>
+                            </blockquote>
+
+                            <p class="text-muted mb-2">
+                                Author:
+                                <a href="{% url 'authors:author' quote.author.id %}" class="fw-semibold">
+                                    {{ quote.author }}
+                                </a>
+                            </p>
+
+                            <div>
+                                {% for tag in quote.tags.all %}
+                                    <a href="{% url 'quotes:quotes_tags' tag.id %}" class="badge text-bg-secondary me-1">
+                                        {{ tag }}
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="alert alert-info">
+                        No quotes yet.
+                    </div>
+                {% endfor %}
+
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if quotes.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ quotes.previous_page_number }}">Previous</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">First</span>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">Previous</span>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                {{ quotes.number }} / {{ quotes.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if quotes.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ quotes.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ quotes.paginator.num_pages }}">Last</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Next</span>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">Last</span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        Navigation
+                    </div>
+                    {% for ten_tags in top_ten_tags %}
+                        <div class="card-body">
+                            <a href="{% url 'quotes:quotes_tags' ten_tags.id %}" class="text-muted mb-0">
+                                {{ ten_tags }}
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

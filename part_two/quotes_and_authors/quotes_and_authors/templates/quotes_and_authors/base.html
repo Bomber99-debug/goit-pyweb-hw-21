@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% block title %}
+    {% endblock %}
+    {% block description %}
+    {% endblock %}
+    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static 'quotes_and_authors/style.css' %}">
+    {% block styles %}{% endblock %}
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{% url 'quotes:home' %}">Quote</a>
+                </li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'quotes:add_quote' %}">Add quote</a>
+                    </li>
+                {% endif %}
+            </ul>
+
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'authors:authors' %}">Authors</a>
+                </li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'authors:add_author' %}">Add author</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'tags:tags' %}">Tags</a>
+                </li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tags:add_tag' %}">Add tag</a>
+                    </li>
+                {% endif %}
+            </ul>
+            {% if user.is_authenticated %}
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            {% else %}
+            <ul class="navbar-nav mb-2 mb-lg-0">
+            {% endif %}
+                {% if user.is_authenticated %}
+                    <form class="d-flex" method="POST" action="{% url 'users:logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-link btn btn-link">Logout</button>
+                    </form>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'users:login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'users:register' %}">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+
+            <ul class="navbar-nav mb-2 mb-lg-0">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'external_sources:external_sources' %}">External Sources</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+{% block content %}
+{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+</body>
+</html>

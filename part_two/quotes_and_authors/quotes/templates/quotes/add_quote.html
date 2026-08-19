@@ -1,0 +1,57 @@
+{% extends 'quotes_and_authors/base.html' %}
+
+{% block title %}
+    <title>Add quote</title>
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="mb-0">Add quote</h4>
+                    </div>
+
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label for="{{ form.quote.id_for_label }}" class="form-label">Quote</label>
+                                {{ form.quote }}
+                                <div class="text-danger small">{{ form.quote.errors }}</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.author.id_for_label }}" class="form-label">Author</label>
+                                {{ form.author }}
+                                <div class="text-danger small">{{ form.author.errors }}</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Tags</label>
+
+                                <div class="border rounded p-3">
+                                    {% for checkbox in form.tags %}
+                                        <div class="form-check form-switch mb-2">
+                                            {{ checkbox.tag }}
+                                            <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                                {{ checkbox.choice_label }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="text-danger small">{{ form.tags.errors }}</div>
+                            </div>
+
+                            <button class="btn btn-primary" type="submit">Save quote</button>
+                            <a href="{% url 'quotes:home' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

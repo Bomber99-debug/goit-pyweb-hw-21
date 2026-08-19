@@ -1,0 +1,52 @@
+{% extends 'quotes_and_authors/base.html' %}
+
+{% block title %}
+    <title>Add author</title>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0">Add author</h4>
+                </div>
+
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.fullname.id_for_label }}" class="form-label">Full name</label>
+                            {{ form.fullname }}
+                            <div class="text-danger small">{{ form.fullname.errors }}</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.born_date.id_for_label }}" class="form-label">Born date</label>
+                            {{ form.born_date }}
+                            <div class="text-danger small">{{ form.born_date.errors }}</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.born_location.id_for_label }}" class="form-label">Born location</label>
+                            {{ form.born_location }}
+                            <div class="text-danger small">{{ form.born_location.errors }}</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                            {{ form.description }}
+                            <div class="text-danger small">{{ form.description.errors }}</div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Save author</button>
+                        <a href="{% url 'authors:authors' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

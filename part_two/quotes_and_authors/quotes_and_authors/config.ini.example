@@ -1,0 +1,8 @@
+[DEV_DB]
+USER=postgres
+DB_NAME=quotes_db
+PASSWORD=your_password
+HOST=localhost
+PORT=5432
+
+[PROD_DB]
