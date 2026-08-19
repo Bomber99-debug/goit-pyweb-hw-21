@@ -1,4 +1,5 @@
 import cloudinary
+from cloudinary import uploader
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Request, Security, status, UploadFile
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -70,7 +71,8 @@ async def update_avatar_user( file: UploadFile = File(),
 	                   api_secret=config.CLOUDINARY_API_SECRET,
 	                   secure=True, )
 
-	r = cloudinary.uploader.upload( file.file, public_id=f'NotesApp/{current_user.user_name}', overwrite=True )
+
+	r = uploader.upload( file.file, public_id=f'NotesApp/{current_user.user_name}', overwrite=True )
 	src_url = cloudinary.CloudinaryImage( f'NotesApp/{current_user.user_name}' ).build_url( width=250,
 	                                                                                        height=250,
 	                                                                                        crop='fill',
