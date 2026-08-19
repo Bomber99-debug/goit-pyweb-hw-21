@@ -3,6 +3,7 @@ from libgravatar import Gravatar
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from entity.models import User
 from src.database.db import get_db
 from src.entity.models import User
 from src.schemas.user import UserCreateSchema
@@ -37,3 +38,10 @@ async def create_user( body: UserCreateSchema, db: AsyncSession = Depends( get_d
 async def update_token( user: User, token: str | None, db: AsyncSession = Depends( get_db ) ):
 	user.refresh_token = token
 	await db.commit()
+
+
+async def update_avatar( email, url: str, db: AsyncSession = Depends( get_db ) ) -> User | None:
+	user = await get_user_by_email( email, db )
+	user.avatar = url
+	await db.commit()
+	return user

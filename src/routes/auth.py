@@ -1,8 +1,11 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Security, status
+import cloudinary
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Request, Security, status, UploadFile
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.conf.config import config
 from src.database.db import get_db
+from src.entity.models import User
 from src.repository import users as users_repository
 from src.schemas.token import TokenShema
 from src.schemas.user import UserCreateSchema, UserResponseSchema
@@ -56,3 +59,22 @@ async def refresh_token( credentials: HTTPAuthorizationCredentials = Security( g
 	await users_repository.update_token( user=user, token=refresh_token, db=db )
 	return { "access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer",
 	         }
+
+
+@router.patch( '/avatar', response_model=UserResponseSchema )
+async def update_avatar_user( file: UploadFile = File(),
+                              current_user: User = Depends( auth_service.get_current_user ),
+                              db: AsyncSession = Depends( get_db ), ):
+	cloudinary.config( cloud_name=config.CLOUDINARY_CLOUD_NAME,
+	                   api_key=config.CLOUDINARY_API_KEY,
+	                   api_secret=config.CLOUDINARY_API_SECRET,
+	                   secure=True, )
+
+	r = cloudinary.uploader.upload( file.file, public_id=f'NotesApp/{current_user.user_name}', overwrite=True )
+	src_url = cloudinary.CloudinaryImage( f'NotesApp/{current_user.user_name}' ).build_url( width=250,
+	                                                                                        height=250,
+	                                                                                        crop='fill',
+	                                                                                        version=r.get( 'version',
+	                                                                                                       ), )
+	user = await users_repository.update_avatar( current_user.email, src_url, db )
+	return user

@@ -47,12 +47,12 @@ async def get_contact_by_id( db: AsyncSession = Depends( get_db ),
                              current_user: User = Depends( auth_service.get_current_user ), ) -> Contact:
 	"""Повертає контакт за його ідентифікатором."""
 	contact_id_cache = f"current_user:{current_user.id}:contact_id:{contact_id}"
-	contact = redis_client.get( contact_id_cache )
+	contact = await redis_client.get( contact_id_cache )
 	if contact is None:
 		contact = await contact_repository.get_contact_by_id( db=db, contact_id=contact_id, user=current_user, )
 		if contact is None:
 			raise HTTPException( status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found", )
-		await redis_client.get( contact_id_cache, pickle.dumps( contact ) )
+		await redis_client.set( contact_id_cache, pickle.dumps( contact ) )
 		await redis_client.expire( contact_id_cache, time=60 )
 	else:
 		contact = pickle.loads( contact )
@@ -107,7 +107,7 @@ async def update_contact( contact_data: ContactUpdateSchema,
 		raise HTTPException( status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found", )
 
 	await redis_client.delete( f"current_user:{current_user.id}:contact_id:{contact_id}" )
-	await redis_client.delete( f"current_user:{current_user.id}:contacts" )
+	await redis_client.delete( f"current_user:{current_user.id}:contacts:*" )
 
 	return contact
 
@@ -120,6 +120,6 @@ async def delete_contact( db: AsyncSession = Depends( get_db ),
                           current_user: User = Depends( auth_service.get_current_user ), ) -> None:
 	"""Видаляє контакт за його ідентифікатором."""
 	await redis_client.delete( f"current_user:{current_user.id}:contact_id:{contact_id}" )
-	await redis_client.delete( f"current_user:{current_user.id}:contacts" )
+	await redis_client.delete( f"current_user:{current_user.id}:contacts:*" )
 
 	await contact_repository.delete_contact( db=db, contact_id=contact_id, user=current_user, )

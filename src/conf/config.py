@@ -1,8 +1,10 @@
-from pydantic import field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+from pydantic import field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BASE_DIR = Path( __file__ ).resolve().parent.parent.parent
+
 
 class Settings( BaseSettings ):
 	""" DB connection config """
@@ -17,12 +19,12 @@ class Settings( BaseSettings ):
 	MAIL_PASSWORD: str = "test"
 	MAIL_FROM: str = "admin@web.com"
 	MAIL_SERVER: str = "localhost"
-	MAIL_FROM_NAME:str = "test"
+	MAIL_FROM_NAME: str = "test"
 	MAIL_PORT: int = 1025
 	MAIL_STARTTLS: bool = False
 	MAIL_SSL_TLS: bool = False
 	USE_CREDENTIALS: bool = True
-	VALIDATE_CERTS:bool = True
+	VALIDATE_CERTS: bool = True
 	TEMPLATE_FOLDER: Path = BASE_DIR / "src" / "services" / "templates"
 
 	""" Redis config """
@@ -31,7 +33,17 @@ class Settings( BaseSettings ):
 	REDIS_HOST_IP: str = "127.0.0.1"
 	REDIS_PORT: int = 6379
 	REDIS_DB: int = 0
-	REDIS_URL:str = f"redis://{REDIS_USER}:{REDIS_PASSWORD}@{REDIS_HOST_IP}:{REDIS_PORT}/{REDIS_DB}"
+	REDIS_URL: str = f"redis://{REDIS_USER}:{REDIS_PASSWORD}@{REDIS_HOST_IP}:{REDIS_PORT}/{REDIS_DB}"
+
+	""" Cloudinary config """
+	CLOUDINARY_CLOUD_NAME: str = "my_cloud_name"
+	CLOUDINARY_API_KEY: str = "my_key"
+	CLOUDINARY_API_SECRET: str = "my_secret"
+	CLOUDINARY_SECURE_DISTRIBUTION: str = "mydomain.com"
+	CLOUDINARY_UPLOAD_PREFIX : str= "my_prefix"
+	BASE_CLOUDINARY_URL: str = f"cloudinary://{CLOUDINARY_API_KEY}:{CLOUDINARY_API_SECRET}@{CLOUDINARY_CLOUD_NAME}"
+	CLOUDINARY_URL: str = (f"{BASE_CLOUDINARY_URL}?secure_distribution={CLOUDINARY_SECURE_DISTRIBUTION}&"
+	                  f"upload_prefix ={CLOUDINARY_UPLOAD_PREFIX}")
 
 	@field_validator( "ALGORITHM" )
 	@classmethod

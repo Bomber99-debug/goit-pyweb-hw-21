@@ -47,12 +47,12 @@ async def get_phone_by_id( db: AsyncSession = Depends( get_db ),
 	"""Повертає телефонний номер за його ідентифікатором."""
 
 	phone_id_cache = f"current_user:{current_user.id}:phone_id:{phone_id}"
-	phone = redis_client.get( phone_id_cache )
+	phone = await redis_client.get( phone_id_cache )
 	if phone is None:
 		phone = await phones_repository.get_phone_by_id( db=db, phone_id=phone_id, user=current_user, )
 		if phone is None:
 			raise HTTPException( status_code=status.HTTP_404_NOT_FOUND, detail="Phone not found", )
-		await redis_client.get( phone_id_cache, pickle.dumps( phone ) )
+		await redis_client.set( phone_id_cache, pickle.dumps( phone ) )
 		await redis_client.expire( phone_id_cache, time=60 )
 	else:
 		contact = pickle.loads( phone )
@@ -92,7 +92,7 @@ async def update_phone( phone_data: PhoneUpdateSchema,
 		raise HTTPException( status_code=status.HTTP_404_NOT_FOUND, detail="Phone not found", )
 
 	await redis_client.delete( f"current_user:{current_user.id}:phone_id:{phone_id}" )
-	await redis_client.delete( f"current_user:{current_user.id}:phones" )
+	await redis_client.delete( f"current_user:{current_user.id}:phones:*" )
 
 	return phone
 
@@ -104,6 +104,6 @@ async def delete_phone( db: AsyncSession = Depends( get_db ),
 	"""Видаляє телефонний номер за його ідентифікатором."""
 
 	await redis_client.delete( f"current_user:{current_user.id}:phone_id:{phone_id}" )
-	await redis_client.delete( f"current_user:{current_user.id}:phones" )
+	await redis_client.delete( f"current_user:{current_user.id}:phones:*" )
 
 	await phones_repository.delete_phone( db=db, phone_id=phone_id, user=current_user )

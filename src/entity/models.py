@@ -61,4 +61,4 @@ class User( Base ):
 	created_at: Mapped[ date ] = mapped_column( "created_at", DateTime, default=func.now() )
 	updated_at: Mapped[ date ] = mapped_column( "updated_at", DateTime, default=func.now(), onupdate=func.now(), )
 
-	confirmed: Mapped[bool] = mapped_column( "confirmed", Boolean, default=False, nullable=False )
+	confirmed: Mapped[ bool ] = mapped_column( "confirmed", Boolean, default=False, nullable=False )
