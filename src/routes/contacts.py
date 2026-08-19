@@ -1,15 +1,12 @@
+import pickle
 from collections.abc import Sequence
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Path, Query, Request, status
-from fastapi_cache.decorator import cache
 from pyrate_limiter import Duration, Limiter, Rate
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.conf.config_cache import (custom_contact_key_builder,
-                                   custom_contacts_key_builder,
-                                   invalidate_get_contact_repo_cache,
-                                   )
 from src.database.db import get_db
+from src.database.redis import redis_client
 from src.entity.models import Contact, User
 from src.repository import contacts as contact_repository, phones as phones_repository
 from src.schemas.contacts import ContactCreateSchema, ContactResponseSchema, ContactUpdateSchema
@@ -23,17 +20,21 @@ router = APIRouter( prefix="/contacts", tags=[ "contacts" ], )
 @router.get( "/",
              response_model=list[ ContactResponseSchema ],
              dependencies=[ Depends( RateLimiter( limiter=Limiter( Rate( 1, Duration.SECOND * 5, ), ), ), ), ], )
-@cache( expire=60, namespace="contact_id", key_builder=custom_contacts_key_builder )
 async def get_contacts( limit: int = Query( default=10, ge=10, le=100 ),
                         offset: int = Query( default=0, ge=0 ),
                         db: AsyncSession = Depends( get_db ),
                         current_user: User = Depends( auth_service.get_current_user ), ) -> Sequence[ Contact ]:
 	"""Повертає список контактів з урахуванням пагінації."""
-
-	contact_list = await contact_repository.get_contacts( db=db, skip=offset, limit=limit, user=current_user, )
-
+	contact_list_cache = f"current_user:{current_user.id}:contacts:limit:{limit}:offset:{offset}"
+	contact_list = await redis_client.get( contact_list_cache )
 	if contact_list is None:
-		raise HTTPException( status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found", )
+		contact_list = await contact_repository.get_contacts( db=db, skip=offset, limit=limit, user=current_user, )
+		if contact_list is None:
+			raise HTTPException( status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found", )
+		await redis_client.set( contact_list_cache, pickle.dumps( contact_list ) )
+		await redis_client.expire( name=contact_list_cache, time=60 )
+	else:
+		contact_list = pickle.loads( contact_list )
 
 	return contact_list
 
@@ -41,17 +42,20 @@ async def get_contacts( limit: int = Query( default=10, ge=10, le=100 ),
 @router.get( "/{contact_id}",
              response_model=ContactResponseSchema,
              dependencies=[ Depends( RateLimiter( limiter=Limiter( Rate( 1, Duration.SECOND * 5, ), ), ), ), ], )
-@cache( expire=60, namespace="contact_id", key_builder=custom_contact_key_builder )
 async def get_contact_by_id( db: AsyncSession = Depends( get_db ),
                              contact_id: int = Path( ge=1 ),
                              current_user: User = Depends( auth_service.get_current_user ), ) -> Contact:
 	"""Повертає контакт за його ідентифікатором."""
-
-	contact = await contact_repository.get_contact_by_id( db=db, contact_id=contact_id, user=current_user, )
-
+	contact_id_cache = f"current_user:{current_user.id}:contact_id:{contact_id}"
+	contact = redis_client.get( contact_id_cache )
 	if contact is None:
-		raise HTTPException( status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found", )
-
+		contact = await contact_repository.get_contact_by_id( db=db, contact_id=contact_id, user=current_user, )
+		if contact is None:
+			raise HTTPException( status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found", )
+		await redis_client.get( contact_id_cache, pickle.dumps( contact ) )
+		await redis_client.expire( contact_id_cache, time=60 )
+	else:
+		contact = pickle.loads( contact )
 	return contact
 
 
@@ -97,7 +101,8 @@ async def update_contact( contact_data: ContactUpdateSchema,
 	if contact is None:
 		raise HTTPException( status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found", )
 
-	await invalidate_get_contact_repo_cache( current_user_id=current_user.id, contact_id=contact_id )
+	await redis_client.delete( f"current_user:{current_user.id}:contact_id:{contact_id}" )
+	await redis_client.delete( f"current_user:{current_user.id}:contacts" )
 
 	return contact
 
@@ -107,7 +112,7 @@ async def delete_contact( db: AsyncSession = Depends( get_db ),
                           contact_id: int = Path( ge=1 ),
                           current_user: User = Depends( auth_service.get_current_user ), ) -> None:
 	"""Видаляє контакт за його ідентифікатором."""
-
-	await invalidate_get_contact_repo_cache( current_user_id=current_user.id, contact_id=contact_id )
+	await redis_client.delete( f"current_user:{current_user.id}:contact_id:{contact_id}" )
+	await redis_client.delete( f"current_user:{current_user.id}:contacts" )
 
 	await contact_repository.delete_contact( db=db, contact_id=contact_id, user=current_user, )
