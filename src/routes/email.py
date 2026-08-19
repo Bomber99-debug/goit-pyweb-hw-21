@@ -32,11 +32,14 @@ async def request_email( body: RequestEmail,
                          request: Request,
                          db: AsyncSession = Depends( get_db ), ):
 	user = await repository_email.get_user_by_email( body.email, db )
-	if user.confirmed:
-		return { "message": "Email address already confirmed" }
-	if user:
-		background_tasks.add_task( send_email, user.email, user.user_name, str( request.base_url ) )
-	return { "message": "Email address confirmed" }
+	if not user:
+		if user.confirmed:
+			return { "message": "Email address already confirmed" }
+		if user:
+			background_tasks.add_task( send_email, user.email, user.user_name, str( request.base_url ) )
+		return { "message": "Email address confirmed" }
+	else:
+		raise HTTPException( status_code=status.HTTP_404_NOT_FOUND, detail="User not found", )
 
 
 @router.get( '/{username}' )

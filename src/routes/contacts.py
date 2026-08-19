@@ -107,7 +107,9 @@ async def update_contact( contact_data: ContactUpdateSchema,
 		raise HTTPException( status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found", )
 
 	await redis_client.delete( f"current_user:{current_user.id}:contact_id:{contact_id}" )
-	await redis_client.delete( f"current_user:{current_user.id}:contacts:*" )
+	pattern = f"current_user:{current_user.id}:contacts:"
+	async for key in redis_client.scan_iter( match=pattern ):
+		await redis_client.delete( key )
 
 	return contact
 
@@ -120,6 +122,8 @@ async def delete_contact( db: AsyncSession = Depends( get_db ),
                           current_user: User = Depends( auth_service.get_current_user ), ) -> None:
 	"""Видаляє контакт за його ідентифікатором."""
 	await redis_client.delete( f"current_user:{current_user.id}:contact_id:{contact_id}" )
-	await redis_client.delete( f"current_user:{current_user.id}:contacts:*" )
+	pattern = f"current_user:{current_user.id}:contacts:"
+	async for key in redis_client.scan_iter( match=pattern ):
+		await redis_client.delete( key )
 
 	await contact_repository.delete_contact( db=db, contact_id=contact_id, user=current_user, )

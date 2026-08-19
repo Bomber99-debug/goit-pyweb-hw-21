@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.conf.config import config
 from src.database.db import get_db
+from src.database.redis import redis_client
 from src.entity.models import User
 from src.repository import users as users_repository
 from src.schemas.token import TokenShema
@@ -71,7 +72,6 @@ async def update_avatar_user( file: UploadFile = File(),
 	                   api_secret=config.CLOUDINARY_API_SECRET,
 	                   secure=True, )
 
-
 	r = uploader.upload( file.file, public_id=f'NotesApp/{current_user.user_name}', overwrite=True )
 	src_url = cloudinary.CloudinaryImage( f'NotesApp/{current_user.user_name}' ).build_url( width=250,
 	                                                                                        height=250,
@@ -79,4 +79,5 @@ async def update_avatar_user( file: UploadFile = File(),
 	                                                                                        version=r.get( 'version',
 	                                                                                                       ), )
 	user = await users_repository.update_avatar( current_user.email, src_url, db )
+	await redis_client.delete( f"access_token:{current_user.email}" )
 	return user
