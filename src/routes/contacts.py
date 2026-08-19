@@ -59,7 +59,10 @@ async def get_contact_by_id( db: AsyncSession = Depends( get_db ),
 	return contact
 
 
-@router.post( "/", response_model=ContactCreateSchema, status_code=status.HTTP_201_CREATED, )
+@router.post( "/",
+              response_model=ContactCreateSchema,
+              status_code=status.HTTP_201_CREATED,
+              dependencies=[ Depends( RateLimiter( limiter=Limiter( Rate( 1, Duration.SECOND * 5, ), ), ), ), ], )
 async def create_contact( contact_data: ContactCreateSchema,
                           bt: BackgroundTasks,
                           request: Request,
@@ -85,7 +88,9 @@ async def create_contact( contact_data: ContactCreateSchema,
 	return contact
 
 
-@router.put( "/{contact_id}", response_model=ContactUpdateSchema, )
+@router.put( "/{contact_id}",
+             response_model=ContactUpdateSchema,
+             dependencies=[ Depends( RateLimiter( limiter=Limiter( Rate( 1, Duration.SECOND * 5, ), ), ), ), ], )
 async def update_contact( contact_data: ContactUpdateSchema,
                           contact_id: int = Path( ge=1 ),
                           db: AsyncSession = Depends( get_db ),  # noqa: B008
@@ -107,7 +112,9 @@ async def update_contact( contact_data: ContactUpdateSchema,
 	return contact
 
 
-@router.delete( "/{contact_id}", status_code=status.HTTP_204_NO_CONTENT, )
+@router.delete( "/{contact_id}",
+                status_code=status.HTTP_204_NO_CONTENT,
+                dependencies=[ Depends( RateLimiter( limiter=Limiter( Rate( 1, Duration.SECOND * 5, ), ), ), ), ], )
 async def delete_contact( db: AsyncSession = Depends( get_db ),
                           contact_id: int = Path( ge=1 ),
                           current_user: User = Depends( auth_service.get_current_user ), ) -> None:
