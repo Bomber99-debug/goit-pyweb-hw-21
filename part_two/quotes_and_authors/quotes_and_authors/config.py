@@ -19,7 +19,7 @@ class Settings( BaseSettings ):
 	MAIL_PASSWORD: str = "123456"
 	MAIL_FROM: str = "admin@web.com"
 	MAIL_FROM_NAME: str = "TODO Test Email"
-	MAIL_SERVER: str = "127.0.0.1"
+	EMAIL_HOST: str = "127.0.0.1"
 	MAIL_PORT_SMTP: int = 1025
 	MAIL_CONTAINER_PORT_SMTP: int = 1025
 	MAIL_PORT_HTTP: int = 8025
