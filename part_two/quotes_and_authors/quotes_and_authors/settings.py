@@ -11,10 +11,11 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
-from config import config
+
+from .config import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path( __file__ ).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -29,8 +30,7 @@ ALLOWED_HOSTS = [ ]
 
 # Application definition
 
-INSTALLED_APPS = [
-		'django.contrib.admin',
+INSTALLED_APPS = [ 'django.contrib.admin',
 		'django.contrib.auth',
 		'django.contrib.contenttypes',
 		'django.contrib.sessions',
@@ -43,8 +43,7 @@ INSTALLED_APPS = [
 		'external_sources',
 		]
 
-MIDDLEWARE = [
-		'django.middleware.security.SecurityMiddleware',
+MIDDLEWARE = [ 'django.middleware.security.SecurityMiddleware',
 		'django.contrib.sessions.middleware.SessionMiddleware',
 		'django.middleware.common.CommonMiddleware',
 		'django.middleware.csrf.CsrfViewMiddleware',
@@ -55,19 +54,17 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'quotes_and_authors.urls'
 
-TEMPLATES = [
-		{
-				'BACKEND' : 'django.template.backends.django.DjangoTemplates',
-				'DIRS'    : [ BASE_DIR / 'quotes_and_authors' / 'templates' ],
-				'APP_DIRS': True,
-				'OPTIONS' : {
-						'context_processors': [
-								'django.template.context_processors.request',
-								'django.contrib.auth.context_processors.auth',
-								'django.contrib.messages.context_processors.messages',
-								],
-						},
+TEMPLATES = [ {
+		'BACKEND':  'django.template.backends.django.DjangoTemplates',
+		'DIRS':     [ BASE_DIR / 'quotes_and_authors' / 'templates' ],
+		'APP_DIRS': True,
+		'OPTIONS':  {
+				'context_processors': [ 'django.template.context_processors.request',
+						'django.contrib.auth.context_processors.auth',
+						'django.contrib.messages.context_processors.messages',
+						],
 				},
+		},
 		]
 
 WSGI_APPLICATION = 'quotes_and_authors.wsgi.application'
@@ -77,31 +74,23 @@ WSGI_APPLICATION = 'quotes_and_authors.wsgi.application'
 
 DATABASES = {
 		"default": {
-				"ENGINE"  : "django.db.backends.postgresql_psycopg2",
-				"NAME"    : config.POSTGRES_DB,
-				"USER"    : config.POSTGRES_USER,
+				"ENGINE":   "django.db.backends.postgresql",
+				"NAME":     config.POSTGRES_DB,
+				"USER":     config.POSTGRES_USER,
 				"PASSWORD": config.POSTGRES_PASSWORD,
-				"HOST"    : config.POSTGRES_HOST_IP,
-				"PORT"    : config.POSTGRES_PORT,
+				"HOST":     config.POSTGRES_HOST_IP,
+				"PORT":     config.POSTGRES_PORT,
 				},
 		}
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
-		{
-				'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-				},
-		{
-				'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-				},
-		{
-				'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-				},
-		{
-				'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-				},
+AUTH_PASSWORD_VALIDATORS = [ { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+		}, { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+		}, { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+		}, { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+		},
 		]
 
 # Internationalization

@@ -1,5 +1,4 @@
 FROM python:3.14-slim
-LABEL authors="bomber"
 
 WORKDIR /app
 
@@ -9,9 +8,8 @@ ENV POETRY_VIRTUALENVS_CREATE=false
 
 COPY pyproject.toml poetry.lock ./
 
-RUN poetry install --no-root \
-    && python -m pip install --no-cache-dir --force-reinstall "redis==8.0.1"
+RUN poetry install --no-root
 
-COPY part_two/ .
+COPY part_two/quotes_and_authors/ ./
 
-CMD ["poetry", "run", "python3", "manage.py", "runserver"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
