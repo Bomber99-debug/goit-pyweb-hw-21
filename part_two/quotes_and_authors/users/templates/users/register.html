@@ -1,6 +1,52 @@
 {% extends 'quotes_and_authors/base.html' %}
 
 {% block title %}
-<h2>Password reset request sent</h2>
-<p>We've emailed you with instructions on how to reset your password.</p>
+<title>Register</title>
+{% endblock %}
+
+{% block content %}
+<div>
+    <h2>Register</h2>
+</div>
+
+<form method="post" action="{% url 'users:register' %}">
+    {% csrf_token %}
+
+    <div>
+        <label>
+            Username:
+            {{ form.username }}
+        </label>
+        <span>{{ form.errors.username }}</span>
+    </div>
+
+    <div>
+        <label>
+            Email:
+            {{ form.email }}
+        </label>
+        <span>{{ form.errors.email }}</span>
+    </div>
+
+    <div>
+        <label>
+            Password:
+            {{ form.password1 }}
+        </label>
+        <span>{{ form.errors.password1 }}</span>
+    </div>
+
+    <div>
+        <label>
+            Password confirmation:
+            {{ form.password2 }}
+        </label>
+        <span>{{ form.errors.password2 }}</span>
+    </div>
+
+    <div class="grid">
+        <button type="submit">Submit</button>
+        <button type="reset" class="secondary">Reset</button>
+    </div>
+</form>
 {% endblock %}

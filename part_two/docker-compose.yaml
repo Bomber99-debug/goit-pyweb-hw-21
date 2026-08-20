@@ -26,8 +26,8 @@ services:
   email:
     image: mailhog/mailhog
     ports:
-      - "${MAIL_SERVER}:${MAIL_PORT_SMTP}:${MAIL_CONTAINER_PORT_SMTP}" # SMTP
-      - "${MAIL_SERVER}:${MAIL_PORT_HTTP}:${MAIL_CONTAINER_PORT_HTTP}" # Web UI / API
+      - "${MAIL_HOST_IP}:${MAIL_PORT_SMTP}:${MAIL_CONTAINER_PORT_SMTP}" # SMTP
+      - "${MAIL_HOST_IP}:${MAIL_PORT_HTTP}:${MAIL_CONTAINER_PORT_HTTP}" # Web UI / API
     networks:
       - app_network
 

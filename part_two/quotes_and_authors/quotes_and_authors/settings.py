@@ -21,36 +21,36 @@ BASE_DIR = Path( __file__ ).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-r*9ttx8rh3k-f(=s+#&q23xz=5_u2)yyvnp8r#36fiw*ew!i$g'
+SECRET_KEY = config.DJANGO_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config.DJANGO_DEBUG
 
-ALLOWED_HOSTS = [ ]
+ALLOWED_HOSTS = [ host.strip() for host in config.DJANGO_ALLOWED_HOSTS.split( "," ) if host.strip() ]
 
 # Application definition
 
 INSTALLED_APPS = [ 'django.contrib.admin',
-		'django.contrib.auth',
-		'django.contrib.contenttypes',
-		'django.contrib.sessions',
-		'django.contrib.messages',
-		'django.contrib.staticfiles',
-		'quotes',
-		'authors',
-		'tags',
-		'users',
-		'external_sources',
-		]
+                   'django.contrib.auth',
+                   'django.contrib.contenttypes',
+                   'django.contrib.sessions',
+                   'django.contrib.messages',
+                   'django.contrib.staticfiles',
+                   'quotes',
+                   'authors',
+                   'tags',
+                   'users',
+                   'external_sources',
+                   ]
 
 MIDDLEWARE = [ 'django.middleware.security.SecurityMiddleware',
-		'django.contrib.sessions.middleware.SessionMiddleware',
-		'django.middleware.common.CommonMiddleware',
-		'django.middleware.csrf.CsrfViewMiddleware',
-		'django.contrib.auth.middleware.AuthenticationMiddleware',
-		'django.contrib.messages.middleware.MessageMiddleware',
-		'django.middleware.clickjacking.XFrameOptionsMiddleware',
-		]
+               'django.contrib.sessions.middleware.SessionMiddleware',
+               'django.middleware.common.CommonMiddleware',
+               'django.middleware.csrf.CsrfViewMiddleware',
+               'django.contrib.auth.middleware.AuthenticationMiddleware',
+               'django.contrib.messages.middleware.MessageMiddleware',
+               'django.middleware.clickjacking.XFrameOptionsMiddleware',
+               ]
 
 ROOT_URLCONF = 'quotes_and_authors.urls'
 
@@ -60,9 +60,9 @@ TEMPLATES = [ {
 		'APP_DIRS': True,
 		'OPTIONS':  {
 				'context_processors': [ 'django.template.context_processors.request',
-						'django.contrib.auth.context_processors.auth',
-						'django.contrib.messages.context_processors.messages',
-						],
+				                        'django.contrib.auth.context_processors.auth',
+				                        'django.contrib.messages.context_processors.messages',
+				                        ],
 				},
 		},
 		]
@@ -85,28 +85,30 @@ DATABASES = {
 
 # Email
 
-EMAIL_BACKEND = config.MAIL_BACKEND
-
+EMAIL_BACKEND = config.EMAIL_BACKEND
 EMAIL_HOST = config.EMAIL_HOST
-EMAIL_PORT = config.MAIL_PORT_SMTP
+EMAIL_PORT = config.EMAIL_PORT
 
-EMAIL_HOST_USER = config.MAIL_HOST_USER
-EMAIL_HOST_PASSWORD = config.MAIL_HOST_PASSWORD
+EMAIL_HOST_USER = config.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = config.EMAIL_HOST_PASSWORD
 
-EMAIL_USE_SSL = config.MAIL_USE_SSL
-EMAIL_USE_TLS = config.MAIL_USE_TLS
+EMAIL_USE_SSL = config.EMAIL_USE_SSL
+EMAIL_USE_TLS = config.EMAIL_USE_TLS
 
-DEFAULT_FROM_EMAIL = config.MAIL_FROM
+DEFAULT_FROM_EMAIL = config.DEFAULT_FROM_EMAIL
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [ { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-		}, { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-		}, { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-		}, { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-		},
-		]
+                               },
+                             { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+                               },
+                             { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+                               },
+                             { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+                               },
+                             ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
