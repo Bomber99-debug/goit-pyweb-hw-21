@@ -42,10 +42,14 @@
 							{{ form.password }}
 							<div class="text-danger small">{{ form.password.errors }}</div>
 						</div>
-						<div class="small text-center">
-							<a href="{% url 'users:password_reset' %}" class="text-center"><i>Forgot Password?</i></a>
-						</div>
-						<button type="submit" class="btn btn-primary w-100">Login</button>
+						<button type="submit" class="btn btn-primary w-100 mb-2">
+							Login
+						</button>
+						
+						<a href="{% url 'users:password_reset' %}"
+						   class="btn btn-outline-secondary w-100">
+							Forgot Password?
+						</a>
 					</form>
 				</div>
 			</div>
